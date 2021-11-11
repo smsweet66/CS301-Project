@@ -4,15 +4,10 @@
 
 #pragma once
 
-typedef struct field
-{
-	char fieldName;
-	int fieldValue;
-} field;
-
 typedef struct document
 {
-	field fields[24];
+	char fieldNames[24];
+	int fieldValues[24];
 } document;
 
 typedef struct database
@@ -39,13 +34,13 @@ database readDocuments()
 	database db = {malloc(sizeof(document)*numLines), numLines};
 	for(int i=0; i<numLines; i++)
 		for(int j=1; j<24; j++)
-			db.documents[i].fields[j].fieldName = 0;
+			db.documents[i].fieldNames[j] = 0;
 
 	for(int i=0; i<numLines; i++)
 	{
 		fgets(buf, 200, input);
-		db.documents[i].fields[0].fieldName = 'A';
-		db.documents[i].fields[0].fieldValue = i;
+		db.documents[i].fieldNames[0] = 'A';
+		db.documents[i].fieldValues[0] = i;
 
 		for(int j=0; buf[j] != 0 && j < 200; j++)
 		{
@@ -58,7 +53,7 @@ database readDocuments()
 				else
 					index -= 'A';
 
-				db.documents[i].fields[index].fieldName = buf[j-1];
+				db.documents[i].fieldNames[index] = buf[j-1];
 				j += 2;
 				int fieldVal = 0;
 				if(buf[j] == '-')
@@ -80,7 +75,7 @@ database readDocuments()
 					}
 				}
 
-				db.documents[i].fields[index].fieldValue = fieldVal;
+				db.documents[i].fieldValues[index] = fieldVal;
 			}
 		}
 	}
