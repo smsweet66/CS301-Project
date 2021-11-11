@@ -83,3 +83,93 @@ database readDocuments()
 	fclose(input);
 	return db;
 }
+
+typedef struct matches
+{
+	int* matchingIndexes;
+	unsigned int size;
+} matches;
+
+matches security(database db, int securityLevel)
+{
+	int initMatches[db.size];
+	for(int i=0; i< db.size; i++)
+		initMatches[i] = i;
+
+	unsigned int numMatches = db.size;
+	for(int i=0; i<db.size; i++)
+	{
+		if(db.documents[i].fieldValues[23] > securityLevel)
+		{
+			initMatches[i] = -1;
+			numMatches--;
+		}
+	}
+
+	matches match = {malloc(sizeof(int)*numMatches), numMatches};
+	int matchesIter = 0;
+	for(int i=0; i<db.size; i++)
+	{
+		if(initMatches[i] != -1)
+		{
+			match.matchingIndexes[matchesIter] = initMatches[i];
+			matchesIter++;
+		}
+	}
+
+	return match;
+}
+
+int compare(int a, char op, int b)
+{
+	switch(op)
+	{
+	case '<':
+		return a < b;
+
+	case '=':
+		return a == b;
+
+	case '>':
+		return a > b;
+
+	default:
+		return 0;
+	}
+}
+
+matches getMatches(database db, char fieldName, char op, int value, matches currentMatches)
+{
+	if(currentMatches.matchingIndexes == NULL)
+	{
+		currentMatches.matchingIndexes = malloc(sizeof(int)*db.size);
+		currentMatches.size = db.size;
+		for(int i=0; i<db.size; i++)
+			currentMatches.matchingIndexes[i] = i;
+	}
+
+	unsigned int totalMatches = currentMatches.size;
+	for(int i=0; i<currentMatches.size; i++)
+	{
+		if(db.documents[currentMatches.matchingIndexes[i]].fieldNames[fieldName - 'A'] == 0
+		|| !compare(db.documents[currentMatches.matchingIndexes[i]].fieldValues[fieldName - 'A'], op, value))
+		{
+			currentMatches.matchingIndexes[i] = -1;
+			totalMatches--;
+		}
+	}
+
+	matches newMatches = {malloc(sizeof(int)*totalMatches), totalMatches};
+	unsigned int newMatchesIter = 0;
+	for(unsigned int i=0; i<currentMatches.size && newMatchesIter < newMatches.size; i++)
+	{
+		if(currentMatches.matchingIndexes[i] != -1)
+		{
+			newMatches.matchingIndexes[newMatchesIter] = currentMatches.matchingIndexes[i];
+			newMatchesIter++;
+		}
+	}
+
+	free(currentMatches.matchingIndexes);
+	return newMatches;
+}
