@@ -1,4 +1,5 @@
 #include "database.h"
+#include "linkedList.h"
 
 int main()
 {
@@ -8,18 +9,22 @@ int main()
 	while(strcmp(fgets(buf, 20, stdin), "quit\n") != 0)   //user quits
 	{
 		matches match = {NULL, 0};    //array for storing the indexes that match the request
-		if(strstr(buf, "FIND") != NULL) //find operation
+		char* token = strtok(buf, " \n");
+		if(strcmp(token, "FIND") == 0) //find operation
 		{
 			int securityLevel = 0;
-			for(unsigned int i=5; buf[i] >= '0' && buf[i] <= '9'; i++)
+			token = strtok(NULL, " \n");
+			if(token != NULL)
 			{
-				securityLevel *= 10;
-				securityLevel += buf[i] - '0';
-				i++;
-			}
+				for(unsigned int i = 0; token[i] >= '0' && token[i] <= '9'; i++)
+				{
+					securityLevel *= 10;
+					securityLevel += token[i] - '0';
+					i++;
+				}
 
-			if(securityLevel != 0)
 				match = security(db, securityLevel);
+			}
 
 			while(1)
 			{
@@ -38,23 +43,24 @@ int main()
 				}
 				else if(strchr(buf, '<') != NULL || strchr(buf, '=') != NULL || strchr(buf, '>') != NULL)
 				{
-					char name = buf[0];
-					char op = buf[2];
+					char name = strtok(buf, " \n")[0];
+					char op = strtok(NULL, " \n")[0];
+					token = strtok(NULL, " \n");
 					int value = 0;
-					if(buf[4] == '-')
+					if(token[0] == '-')
 					{
-						for(unsigned int i=5; buf[i] >= '0' && buf[i] <= '9'; i++)
+						for(unsigned int i=1; token[i] >= '0' && token[i] <= '9'; i++)
 						{
 							value *= 10;
-							value = value - buf[i] - '0';
+							value = value - token[i] - '0';
 						}
 					}
 					else
 					{
-						for(unsigned int i = 4; buf[i] >= '0' && buf[i] <= '9'; i++)
+						for(unsigned int i = 0; token[i] >= '0' && token[i] <= '9'; i++)
 						{
 							value *= 10;
-							value += buf[i] - '0';
+							value += token[i] - '0';
 						}
 					}
 
@@ -62,12 +68,13 @@ int main()
 				}
 			}
 
-			int projectSize = (strlen(buf) - 2)/2;
-			char project[projectSize];
-			for(int i=0; i<projectSize; i++)
-				project[i] = buf[2*i];
+			node* projection = malloc(sizeof(node));
+			projection->val = strtok(buf, " \n")[0];
+			projection->next = NULL;
+			for(node* iter = projection; (token = strtok(NULL, " \n"))[0] != ';'; iter = iter->next)
+				createNode(iter, token[0]);
 
-			if(project[0] == 'X')
+			if(projection->val == 'X')
 			{
 				for(int i=0; i<match.size; i++)
 				{
@@ -86,25 +93,27 @@ int main()
 			{
 				for(int i=0; i<match.size; i++)
 				{
-					int hasFields = 0;
-					for(int j=0; j<projectSize; j++)
+					int hasProjection = 0;
+					for(node *iter = projection; iter != NULL; iter = iter->next)
 					{
-						if(project[j] == 'Y')
-							project[j]--;
+						if(iter->val == 'Y')
+							iter->val--;
 
-						char fieldName = db.documents[match.matchingIndexes[i]].fieldNames[project[j] - 'A'];
-						int fieldVal = db.documents[match.matchingIndexes[i]].fieldValues[project[j] - 'A'];
+						char fieldName = db.documents[match.matchingIndexes[i]].fieldNames[iter->val - 'A'];
+						int fieldVal = db.documents[match.matchingIndexes[i]].fieldValues[iter->val - 'A'];
 						if(fieldName != 0)
 						{
 							printf("%c: %d ", fieldName, fieldVal);
-							hasFields++;
+							hasProjection++;
 						}
 					}
 
-					if(hasFields > 0)   //if it actually printed something on the line
+					if(hasProjection > 0)
 						printf("\n");
 				}
 			}
+
+			deleteList(projection);
 		}
 		else if(strstr(buf, "SORT") != NULL)
 		{
