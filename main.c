@@ -24,7 +24,9 @@ int main()
 			while(1)
 			{
 				fgets(buf, 20, stdin);
-				if(strchr(buf, 'Z') != NULL)
+				if(strchr(buf, ';') != NULL)
+					break;
+				else if(strchr(buf, 'Z') != NULL)
 				{
 					if(match.matchingIndexes == NULL)
 					{
@@ -58,14 +60,12 @@ int main()
 
 					match = getMatches(db, name, op, value, match);
 				}
-				else
-					break;
 			}
 
 			int projectSize = (strlen(buf) - 2)/2;
 			char project[projectSize];
-			for(int i=0; i<strlen(buf) - 2; i += 2)
-				project[i/2] = buf[i];
+			for(int i=0; i<projectSize; i++)
+				project[i] = buf[2*i];
 
 			if(project[0] == 'X')
 			{
@@ -82,6 +82,33 @@ int main()
 					printf("\n");
 				}
 			}
+			else
+			{
+				for(int i=0; i<match.size; i++)
+				{
+					int hasFields = 0;
+					for(int j=0; j<projectSize; j++)
+					{
+						if(project[j] == 'Y')
+							project[j]--;
+
+						char fieldName = db.documents[match.matchingIndexes[i]].fieldNames[project[j] - 'A'];
+						int fieldVal = db.documents[match.matchingIndexes[i]].fieldValues[project[j] - 'A'];
+						if(fieldName != 0)
+						{
+							printf("%c: %d ", fieldName, fieldVal);
+							hasFields++;
+						}
+					}
+
+					if(hasFields > 0)   //if it actually printed something on the line
+						printf("\n");
+				}
+			}
+		}
+		else if(strstr(buf, "SORT") != NULL)
+		{
+
 		}
 
 		if(match.matchingIndexes != NULL)
