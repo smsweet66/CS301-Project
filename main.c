@@ -71,7 +71,9 @@ int main()
 
 			if(match.size != 0)
 			{
-
+				fgets(buf, 20, stdin);
+				token = strtok(buf, " \n");
+				match = getMatches(db, token[0], 0, 0, match);
 			}
 		}
 

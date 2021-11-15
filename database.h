@@ -137,30 +137,65 @@ matches getMatches(database db, char fieldName, char op, int value, matches curr
 			currentMatches.matchingIndexes[i] = i;
 	}
 
-	unsigned int totalMatches = currentMatches.size;
-	for(int i=0; i<currentMatches.size; i++)
+	if(op != 0)
 	{
-		if(db.documents[currentMatches.matchingIndexes[i]].fieldNames[fieldName - 'A'] == 0
-		|| !compare(db.documents[currentMatches.matchingIndexes[i]].fieldValues[fieldName - 'A'], op, value))
+		unsigned int totalMatches = currentMatches.size;
+		for(int i = 0; i < currentMatches.size; i++)
 		{
-			currentMatches.matchingIndexes[i] = -1;
-			totalMatches--;
-		}
-	}
+			if(fieldName == 'Y')
+				fieldName--;
 
-	matches newMatches = {malloc(sizeof(int)*totalMatches), totalMatches};
-	unsigned int newMatchesIter = 0;
-	for(unsigned int i=0; i<currentMatches.size && newMatchesIter < newMatches.size; i++)
+			if(db.documents[currentMatches.matchingIndexes[i]].fieldNames[fieldName - 'A'] == 0
+			   || !compare(db.documents[currentMatches.matchingIndexes[i]].fieldValues[fieldName - 'A'], op, value))
+			{
+				currentMatches.matchingIndexes[i] = -1;
+				totalMatches--;
+			}
+		}
+
+		matches newMatches = {malloc(sizeof(int)*totalMatches), totalMatches};
+		unsigned int newMatchesIter = 0;
+		for(unsigned int i = 0; i < currentMatches.size && newMatchesIter < newMatches.size; i++)
+		{
+			if(currentMatches.matchingIndexes[i] != -1)
+			{
+				newMatches.matchingIndexes[newMatchesIter] = currentMatches.matchingIndexes[i];
+				newMatchesIter++;
+			}
+		}
+
+		free(currentMatches.matchingIndexes);
+		return newMatches;
+	}
+	else
 	{
-		if(currentMatches.matchingIndexes[i] != -1)
+		unsigned int totalMatches = currentMatches.size;
+		for(int i = 0; i < currentMatches.size; i++)
 		{
-			newMatches.matchingIndexes[newMatchesIter] = currentMatches.matchingIndexes[i];
-			newMatchesIter++;
-		}
-	}
+			if(fieldName == 'Y')
+				fieldName--;
 
-	free(currentMatches.matchingIndexes);
-	return newMatches;
+			if(db.documents[currentMatches.matchingIndexes[i]].fieldNames[fieldName - 'A'] == 0)
+			{
+				currentMatches.matchingIndexes[i] = -1;
+				totalMatches--;
+			}
+		}
+
+		matches newMatches = {malloc(sizeof(int)*totalMatches), totalMatches};
+		unsigned int newMatchesIter = 0;
+		for(int i=0; i<currentMatches.size; i++)
+		{
+			if(currentMatches.matchingIndexes[i] != -1)
+			{
+				newMatches.matchingIndexes[newMatchesIter] = currentMatches.matchingIndexes[i];
+				newMatchesIter++;
+			}
+		}
+
+		free(currentMatches.matchingIndexes);
+		return newMatches;
+	}
 }
 
 void printDocument(document* d, vector* projection)
