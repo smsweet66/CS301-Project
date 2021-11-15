@@ -1,5 +1,5 @@
 #include "database.h"
-#include "linkedList.h"
+#include "sort.h"
 
 int main()
 {
@@ -12,16 +12,10 @@ int main()
 		char* token = strtok(buf, " \n");
 		if(strcmp(token, "FIND") == 0) //find operation
 		{
-			int securityLevel = 0;
 			token = strtok(NULL, " \n");
 			if(token != NULL)
 			{
-				for(unsigned int i = 0; token[i] >= '0' && token[i] <= '9'; i++)
-				{
-					securityLevel *= 10;
-					securityLevel += token[i] - '0';
-					i++;
-				}
+				int securityLevel = atoi(token);
 
 				match = security(db, securityLevel);
 			}
@@ -46,83 +40,49 @@ int main()
 					char name = strtok(buf, " \n")[0];
 					char op = strtok(NULL, " \n")[0];
 					token = strtok(NULL, " \n");
-					int value = 0;
-					if(token[0] == '-')
-					{
-						for(unsigned int i=1; token[i] >= '0' && token[i] <= '9'; i++)
-						{
-							value *= 10;
-							value = value - token[i] - '0';
-						}
-					}
-					else
-					{
-						for(unsigned int i = 0; token[i] >= '0' && token[i] <= '9'; i++)
-						{
-							value *= 10;
-							value += token[i] - '0';
-						}
-					}
-
+					int value = atoi(token);
 					match = getMatches(db, name, op, value, match);
 				}
 			}
 
-			node* projection = malloc(sizeof(node));
-			projection->val = strtok(buf, " \n")[0];
-			projection->next = NULL;
-			for(node* iter = projection; (token = strtok(NULL, " \n"))[0] != ';'; iter = iter->next)
-				createNode(iter, token[0]);
+			vector projection = {malloc(sizeof(char)), 0, 1};
+			push(&projection, strtok(buf, " \n")[0]);
+			while((token = strtok(NULL, " \n"))[0] != ';')
+				push(&projection, token[0]);
 
-			if(projection->val == 'X')
+			if(projection.arr[0] == 'X')
 			{
 				for(int i=0; i<match.size; i++)
-				{
-					for(int j=0; j<24; j++)
-					{
-						char fieldName = db.documents[match.matchingIndexes[i]].fieldNames[j];
-						int fieldVal = db.documents[match.matchingIndexes[i]].fieldValues[j];
-						if(fieldName != 0)
-							printf("%c: %d ", fieldName, fieldVal);
-					}
-
-					printf("\n");
-				}
+					printDocument(&db.documents[match.matchingIndexes[i]], NULL);
 			}
 			else
 			{
 				for(int i=0; i<match.size; i++)
-				{
-					int hasProjection = 0;
-					for(node *iter = projection; iter != NULL; iter = iter->next)
-					{
-						if(iter->val == 'Y')
-							iter->val--;
-
-						char fieldName = db.documents[match.matchingIndexes[i]].fieldNames[iter->val - 'A'];
-						int fieldVal = db.documents[match.matchingIndexes[i]].fieldValues[iter->val - 'A'];
-						if(fieldName != 0)
-						{
-							printf("%c: %d ", fieldName, fieldVal);
-							hasProjection++;
-						}
-					}
-
-					if(hasProjection > 0)
-						printf("\n");
-				}
+					printDocument(&db.documents[match.matchingIndexes[i]], &projection);
 			}
 
-			deleteList(projection);
+			free(projection.arr);
 		}
-		else if(strstr(buf, "SORT") != NULL)
+		else if(strstr(token, "SORT") != NULL)
 		{
+			token = strtok(NULL, " \n");
+			if(token != NULL)
+				match = security(db, atoi(token));
 
+			if(match.size != 0)
+			{
+
+			}
 		}
 
 		if(match.matchingIndexes != NULL)
 			free(match.matchingIndexes);
+
+		match.matchingIndexes = NULL;
 	}
+
+	for(int i=0; i<db.size; i++)
+		free(db.documents[i].docOrder.arr);
 
 	free(db.documents);
 

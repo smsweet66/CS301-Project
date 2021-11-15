@@ -1,6 +1,9 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <malloc.h>
+
+#include "vector.h"
 
 #pragma once
 
@@ -8,6 +11,7 @@ typedef struct document
 {
 	char fieldNames[24];
 	int fieldValues[24];
+	vector docOrder;
 } document;
 
 typedef struct database
@@ -16,10 +20,12 @@ typedef struct database
 	unsigned int size;
 } database;
 
+//TODO use strtok
 database readDocuments()
 {
 	FILE *input = fopen("data.txt", "r");
 	char buf[200];
+	char* token;
 	int numLines = 0;
 	while(fgets(buf, 200, input) != NULL)
 	{
@@ -41,42 +47,25 @@ database readDocuments()
 		fgets(buf, 200, input);
 		db.documents[i].fieldNames[0] = 'A';
 		db.documents[i].fieldValues[0] = i;
+		db.documents[i].docOrder.arr = malloc(sizeof(char));
+		db.documents[i].docOrder.size = 0;
+		db.documents[i].docOrder.capacity = 1;
+		push(&db.documents[i].docOrder, 'A');
 
-		for(int j=0; buf[j] != 0 && j < 200; j++)
+		token = strtok(buf, " :\n");
+		while(token != NULL)
 		{
-			unsigned char index;
-			if(buf[j] == ':')
-			{
-				index = buf[j-1];
-				if(index == 'Y')
-					index = index - 1 - 'A';
-				else
-					index -= 'A';
+			unsigned char index = token[0];
+			if(index == 'Y')
+				index--;
 
-				db.documents[i].fieldNames[index] = buf[j-1];
-				j += 2;
-				int fieldVal = 0;
-				if(buf[j] == '-')
-				{
-					while(buf[j] >= '0' && buf[j] <= '9')
-					{
-						fieldVal *= 10;
-						fieldVal -= buf[j] - '0';
-						j++;
-					}
-				}
-				else
-				{
-					while(buf[j] >= '0' && buf[j] <= '9')
-					{
-						fieldVal *= 10;
-						fieldVal += buf[j] - '0';
-						j++;
-					}
-				}
+			push(&db.documents[i].docOrder, index);
+			index -= 'A';
+			db.documents[i].fieldNames[index] = token[0];
 
-				db.documents[i].fieldValues[index] = fieldVal;
-			}
+			token = strtok(NULL, " :\n");
+			db.documents[i].fieldValues[index] = atoi(token);
+			token = strtok(NULL, " :\n");
 		}
 	}
 
@@ -172,4 +161,36 @@ matches getMatches(database db, char fieldName, char op, int value, matches curr
 
 	free(currentMatches.matchingIndexes);
 	return newMatches;
+}
+
+void printDocument(document* d, vector* projection)
+{
+	if(projection == NULL)
+	{
+		for(int i=0; i<d->docOrder.size; i++)
+		{
+			char fieldName = d->fieldNames[d->docOrder.arr[i] - 'A'];
+			int fieldVal = d->fieldValues[d->docOrder.arr[i] - 'A'];
+			printf("%c: %d ", fieldName, fieldVal);
+		}
+
+		printf("\n");
+	}
+	else
+	{
+		int print = 0;
+		for(int i=0; i<d->docOrder.size; i++)
+		{
+			char fieldName = d->fieldNames[d->docOrder.arr[i] - 'A'];
+			int fieldVal = d->fieldValues[d->docOrder.arr[i] - 'A'];
+			if(contains(projection, fieldName))
+			{
+				print++;
+				printf("%c: %d ", fieldName, fieldVal);
+			}
+		}
+
+		if(print > 0)
+			printf("\n");
+	}
 }
