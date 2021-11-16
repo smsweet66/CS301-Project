@@ -1,6 +1,11 @@
 #include "database.h"
 #include "sort.h"
 
+int compareFun(int a, int b, int direction)
+{
+
+}
+
 int main()
 {
 	database db = readDocuments();  //creates the database from the input file
@@ -74,6 +79,8 @@ int main()
 				fgets(buf, 20, stdin);
 				token = strtok(buf, " \n");
 				match = getMatches(db, token[0], 0, 0, match);
+				if(match.size != 0)
+					sort(match.matchingIndexes, match.size, compareFun, 1);
 			}
 		}
 
