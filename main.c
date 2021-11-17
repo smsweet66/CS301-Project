@@ -1,9 +1,18 @@
 #include "database.h"
 #include "sort.h"
 
-int compareFun(int a, int b, int direction)
+//TODO fix compare function (add db variable)
+static int compare(int a, int b, int direction)
 {
-
+	if(direction == 1)
+		return a < b;
+	else if(direction == -1)
+		return a > b;
+	else
+	{
+		fprintf(stderr, "%d is not a valid direction", direction);
+		return 0;
+	}
 }
 
 int main()
@@ -73,14 +82,25 @@ int main()
 			token = strtok(NULL, " \n");
 			if(token != NULL)
 				match = security(db, atoi(token));
+			else
+			{
+				match.size = db.size;
+				match.matchingIndexes = malloc(sizeof(int)*match.size);
+				for(int i = 0; i < db.size; ++i)
+					match.matchingIndexes[i] = i;
+			}
 
 			if(match.size != 0)
 			{
 				fgets(buf, 20, stdin);
 				token = strtok(buf, " \n");
 				match = getMatches(db, token[0], 0, 0, match);
+				int direction = atoi(strtok(NULL, " \n"));
 				if(match.size != 0)
-					sort(match.matchingIndexes, match.size, compareFun, 1);
+					sort(match.matchingIndexes, match.size, compare, direction);
+
+				for(int i=0; i<match.size; i++)
+					printDocument(&db.documents[match.matchingIndexes[i]], NULL);
 			}
 		}
 

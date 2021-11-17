@@ -7,7 +7,7 @@ typedef struct vector
 	int capacity;
 }vector;
 
-int push(vector* v, int val)
+static int push(vector* v, int val)
 {
 	if(v->size == v->capacity)
 	{
@@ -24,7 +24,7 @@ int push(vector* v, int val)
 	v->size++;
 }
 
-int contains(vector* v, char val)
+static int contains(vector* v, char val)
 {
 	for(int i=0; i<v->size; i++)
 		if(v->arr[i] == val)

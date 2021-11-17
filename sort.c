@@ -1,7 +1,5 @@
 #include "sort.h"
 
-#pragma once
-
 /**
  * Merges the two sections of the array together in sorted order
  */
