@@ -92,15 +92,26 @@ int main()
 
 			if(match.size != 0)
 			{
+				retry:
 				fgets(buf, 20, stdin);
-				token = strtok(buf, " \n");
-				match = getMatches(db, token[0], 0, 0, match);
-				int direction = atoi(strtok(NULL, " \n"));
-				if(match.size != 0)
-					sort(match.matchingIndexes, match.size, compare, direction);
+				if(strchr(buf, ';') != NULL)
+				{
+					char val = strtok(buf, " \n")[0];
+					match = getMatches(db, val, 0, 0, match);
+					int direction = atoi(strtok(NULL, " ;\n"));
+					if(val == 'Y')
+						val--;
+					if(match.size != 0)
+						sort(match.matchingIndexes, match.size, compare, direction, &db, val - 'A');
 
-				for(int i=0; i<match.size; i++)
-					printDocument(&db.documents[match.matchingIndexes[i]], NULL);
+					for(int i = 0; i < match.size; i++)
+						printDocument(&db.documents[match.matchingIndexes[i]], NULL);
+				}
+				else
+				{
+					printf("\e[1;31mInvalid syntax, ; expected\e[0m\n");
+					goto retry;
+				}
 			}
 		}
 
