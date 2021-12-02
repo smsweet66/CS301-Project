@@ -1,7 +1,6 @@
 #include "database.h"
 #include "sort.h"
 
-//TODO fix compare function (add db variable)
 static int compare(int a, int b, int direction)
 {
 	if(direction == 1)
