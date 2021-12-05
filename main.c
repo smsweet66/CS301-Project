@@ -19,11 +19,14 @@ int main()
 	database db = readDocuments();  //creates the database from the input file
 
 	char buf[20];   //buffer to store user input
+	unsigned int queryNumber = 1;
 	while(strcmp(fgets(buf, 20, stdin), "quit\n") != 0)   //user quits
 	{
 		matches match = {NULL, 0};    //array for storing the indexes that match the request
 		char* token = strtok(buf, " \n");
-		if(strcmp(token, "FIND") == 0) //find operation
+		if(token == NULL)
+			continue;
+		else if(strcmp(token, "FIND") == 0) //find operation
 		{
 			token = strtok(NULL, " \n");
 			if(token != NULL)
@@ -63,6 +66,7 @@ int main()
 			while((token = strtok(NULL, " \n"))[0] != ';')
 				push(&projection, token[0]);
 
+			printf("\\\\Query %u\n", queryNumber++);
 			if(projection.arr[0] == 'X')
 			{
 				for(int i=0; i<match.size; i++)
@@ -103,6 +107,7 @@ int main()
 					if(match.size != 0)
 						sort(match.matchingIndexes, match.size, compare, direction, &db, val - 'A');
 
+					printf("\\\\Query %u\n", queryNumber++);
 					for(int i = 0; i < match.size; i++)
 						printDocument(&db.documents[match.matchingIndexes[i]], NULL);
 				}
