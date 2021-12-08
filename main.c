@@ -20,13 +20,13 @@ int main()
 
 	char buf[20];   //buffer to store user input
 	unsigned int queryNumber = 1;
-	while(strcmp(fgets(buf, 20, stdin), "quit\n") != 0)   //user quits
+	while(strstr(fgets(buf, 20, stdin), "quit") == NULL)   //user quits
 	{
 		matches match = {NULL, 0};    //array for storing the indexes that match the request
 		char* token = strtok(buf, " \n");
 		if(token == NULL)
 			continue;
-		else if(strcmp(token, "FIND") == 0) //find operation
+		else if(strstr(token, "FIND") != NULL) //find operation
 		{
 			token = strtok(NULL, " \n");
 			if(token != NULL)
@@ -78,6 +78,7 @@ int main()
 					printDocument(&db.documents[match.matchingIndexes[i]], &projection);
 			}
 
+			printf("\n");
 			free(projection.arr);
 		}
 		else if(strstr(token, "SORT") != NULL)
@@ -110,6 +111,8 @@ int main()
 					printf("\\\\Query %u\n", queryNumber++);
 					for(int i = 0; i < match.size; i++)
 						printDocument(&db.documents[match.matchingIndexes[i]], NULL);
+
+					printf("\n");
 				}
 				else
 				{

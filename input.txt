@@ -1,0 +1,26 @@
+FIND
+E = 47
+X ;
+FIND 3
+E = 47
+X ;
+FIND
+H = 76
+B A ;
+FIND
+E = 47
+F I B ;
+FIND 5
+I > 91
+B < 500
+B I ;
+FIND 2
+B = 2
+X ;
+SORT 3
+S = 1 ;
+FIND
+Z
+S ;
+
+quit
