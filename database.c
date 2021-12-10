@@ -25,7 +25,7 @@ database readDocuments()
 	{
 		fgets(buf, 200, input);
 		db.documents[i].fieldNames[0] = 'A';
-		db.documents[i].fieldValues[0] = i;
+		db.documents[i].fieldValues[0] = i+1;
 		db.documents[i].docOrder.arr = malloc(sizeof(char));
 		db.documents[i].docOrder.size = 0;
 		db.documents[i].docOrder.capacity = 1;

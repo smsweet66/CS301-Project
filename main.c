@@ -4,9 +4,9 @@
 static int compare(int a, int b, int direction)
 {
 	if(direction == 1)
-		return a < b;
+		return a <= b;
 	else if(direction == -1)
-		return a > b;
+		return a >= b;
 	else
 	{
 		fprintf(stderr, "%d is not a valid direction", direction);
@@ -102,6 +102,8 @@ int main()
 				{
 					char val = strtok(buf, " \n")[0];
 					match = getMatches(db, val, 0, 0, match);
+
+					strtok(NULL, " ;\n");
 					int direction = atoi(strtok(NULL, " ;\n"));
 					if(val == 'Y')
 						val--;
@@ -121,6 +123,8 @@ int main()
 				}
 			}
 		}
+		else
+			printf("\e[1;31mERROR - no such operation\e[0m\n");
 
 		if(match.matchingIndexes != NULL)
 			free(match.matchingIndexes);

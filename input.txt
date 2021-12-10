@@ -4,7 +4,7 @@ X ;
 FIND 3
 E = 47
 X ;
-FIND
+FING
 H = 76
 B A ;
 FIND
@@ -22,5 +22,4 @@ S = 1 ;
 FIND
 Z
 S ;
-
 quit

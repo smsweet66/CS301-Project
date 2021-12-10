@@ -55,11 +55,11 @@ static void merge(int *array, unsigned int high, unsigned int low, int compare(i
 			}
 		}
 
-			/*
-			 * If the whole right side has been placed, it then places
-			 * the left side into the array.
-			 */
-		else if(lIterator < bMiddle && rIterator == arrayBLength)
+		/*
+		 * If the whole right side has been placed, it then places
+		 * the left side into the array.
+		 */
+		if(lIterator < bMiddle && rIterator == arrayBLength)
 		{
 			while(lIterator < bMiddle)
 			{
